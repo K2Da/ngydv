@@ -1,0 +1,17 @@
+[package]
+name = "ngydv"
+version = "0.1.1"
+license = "Apache-2.0"
+authors = ["K2Da <id.k2da@gmail.com>"]
+edition = "2018"
+description = "A tool to store/restore aws cli credential"
+readme = "README.md"
+homepage = "https://github.com/K2Da/ngydv"
+repository = "https://github.com/K2Da/ngydv"
+keywords = ["aws", "cli"]
+
+[dependencies]
+chuoku = "0.1.0"
+tokio = { version = "0.2", features = ["full"] }
+structopt = "0.3"
+thiserror = "1.0"
