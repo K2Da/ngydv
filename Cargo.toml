@@ -1,6 +1,6 @@
 [package]
 name = "ngydv"
-version = "0.1.1"
+version = "0.1.2"
 license = "Apache-2.0"
 authors = ["K2Da <id.k2da@gmail.com>"]
 edition = "2018"
@@ -11,7 +11,8 @@ repository = "https://github.com/K2Da/ngydv"
 keywords = ["aws", "cli"]
 
 [dependencies]
-chuoku = "0.1.0"
+chuoku = "0.1"
+# chuoku = { path = "../chuoku" }
 tokio = { version = "0.2", features = ["full"] }
 structopt = "0.3"
 thiserror = "1.0"

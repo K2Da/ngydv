@@ -95,7 +95,7 @@ source <(ngydv clear env)
 ```
 
 ### profile
-list available profiles.
+List available profiles.
 
 ```
 $ ngydv profile
@@ -106,8 +106,22 @@ $ ngydv profile
  3  | hpmadm    | ap-northeast-1 | Assume role from hpm       | -
 ```
 
+### show
+Shows current default profile
+
+```
+$ ngydv show
+1. checking AWS_ACCESS_KEY_ID and AWS_ACCESS_KEY_ID.
+  environment variables are not set.
+2. checking AWS_PROFILE.
+  environment variable is not set.
+3. checking profile named 'default'.
+
+use profile "default" as default.
+```
+
 ### env
-list environment variables related AWS CLI.
+List environment variables related AWS CLI.
 
 ```
 $ ngydv env

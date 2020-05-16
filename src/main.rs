@@ -5,6 +5,7 @@ use chuoku::client::{assume_role, create_session};
 use crate::error::Result;
 use crate::error::Error::*;
 use structopt::StructOpt;
+use chuoku::profile::show::show_current_profile;
 
 #[tokio::main]
 async fn main() {
@@ -18,7 +19,7 @@ async fn execute(opts: opts::Opts) -> Result<()> {
     let mut profile_map = read_aws_config()?;
 
     use opts::{SubCommand, ClearCommand};
-    match opts.subcmd {
+    match opts.sub_command {
         SubCommand::Profile => Profile::print_table(&profile_map),
         SubCommand::Export { profile } => profile_map.print_export(&profile)?,
         SubCommand::In { profile: profile_name, token} => {
@@ -33,6 +34,7 @@ async fn execute(opts: opts::Opts) -> Result<()> {
             store_credentials(&mut profile_map)?;
         }
         SubCommand::Env => list_environment_vars(),
+        SubCommand::Show => show_current_profile(&profile_map),
         SubCommand::Clear { command } => match command {
             ClearCommand::Session => {
                 delete_credentials()?;

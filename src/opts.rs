@@ -4,7 +4,7 @@ use structopt::StructOpt;
 #[structopt(name = "opts")]
 pub struct Opts {
     #[structopt(subcommand)]
-    pub subcmd: SubCommand,
+    pub sub_command: SubCommand,
 }
 
 #[derive(StructOpt, Debug)]
@@ -16,6 +16,10 @@ pub enum SubCommand {
     /// Lists current environment variables related AWS CLI.
     #[structopt(name = "env")]
     Env,
+
+    /// Shows current default session.
+    #[structopt(name = "show")]
+    Show,
 
     /// Creates session or assume role based on provided profile type.
     #[structopt(name = "in")]
