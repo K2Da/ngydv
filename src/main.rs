@@ -1,11 +1,19 @@
-mod opts;
+mod client;
+mod env;
 mod error;
-use chuoku::prelude::*;
-use chuoku::client::{assume_role, create_session};
-use crate::error::Result;
-use crate::error::Error::*;
+mod file;
+mod opts;
+mod profile;
+use client::{assume_role, create_session};
+use env::clear_environment_vars;
+use env::list_environment_vars;
+use error::Error::*;
+use error::Result;
+use file::aws_setting::read_aws_config;
+use file::credentials::{delete_credentials, store_credentials};
+use profile::show::show_current_profile;
+use profile::Profile;
 use structopt::StructOpt;
-use chuoku::profile::show::show_current_profile;
 
 #[tokio::main]
 async fn main() {
@@ -18,13 +26,16 @@ async fn main() {
 async fn execute(opts: opts::Opts) -> Result<()> {
     let mut profile_map = read_aws_config()?;
 
-    use opts::{SubCommand, ClearCommand};
+    use opts::{ClearCommand, SubCommand};
     match opts.sub_command {
         SubCommand::Profile => Profile::print_table(&profile_map),
         SubCommand::Export { profile } => profile_map.print_export(&profile)?,
-        SubCommand::In { profile: profile_name, token} => {
+        SubCommand::In {
+            profile: profile_name,
+            token,
+        } => {
             let profile = profile_map.get_mut(&profile_name)?;
-            use chuoku::profile::ProfileType::*;
+            use crate::profile::ProfileType::*;
             match profile.profile_type() {
                 AssumeRole(_) => assume_role::send(profile, &token).await?,
                 SessionWithMFA => create_session::send(profile, &token).await?,

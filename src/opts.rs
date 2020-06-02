@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "opts")]
+#[structopt(name = "ngydv")]
 pub struct Opts {
     #[structopt(subcommand)]
     pub sub_command: SubCommand,
@@ -40,9 +40,9 @@ pub enum SubCommand {
     /// Clears session or environment variables for AWS CLI.
     #[structopt(name = "clear")]
     Clear {
-       #[structopt(subcommand)]
-       command: ClearCommand,
-    }
+        #[structopt(subcommand)]
+        command: ClearCommand,
+    },
 }
 
 #[derive(StructOpt, Debug)]
