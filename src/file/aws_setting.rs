@@ -19,7 +19,7 @@ pub fn read_aws_config() -> Result<ProfileMap> {
         .map_err(|e| CredentialFileError(format!("{:?}", e)))?;
     read_credentials(&cred, &mut props)?;
 
-    if let Ok(ngydv) = Ini::load_from_file(file::ngydv_config_file()?)  {
+    if let Ok(ngydv) = Ini::load_from_file(file::ngydv_config_file()?) {
         read_ngydv(&ngydv, &mut props)?;
     }
 
@@ -52,7 +52,7 @@ fn create_profile(name: &str, prop: &(usize, HashMap<String, String>)) -> Profil
         profile.access = Some(Access::AccessKey(AccessKey {
             access_key_id: access_key_id.to_string(),
             secret_access_key: secret_access_key.to_string(),
-            mfa_device: prop.get("mfa_device").map(|s| s.to_string()),
+            mfa_serial: prop.get("mfa_serial").map(|s| s.to_string()),
         }));
     }
 
@@ -192,7 +192,7 @@ aws_secret_access_key = {}
                 access: Some(Access::AccessKey(AccessKey {
                     access_key_id: KEY_ID.to_string(),
                     secret_access_key: SECRET_KEY.to_string(),
-                    mfa_device: None,
+                    mfa_serial: None,
                 })),
                 credential: None,
             };

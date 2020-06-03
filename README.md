@@ -11,12 +11,12 @@ cargo install ngydv
 ## Usage
 You need aws cli configuration file ~/.aws/config and ~/.aws/credentials.
 
-And at more file at ~/.aws/ngydv to store your mfa device arn, if needed.
+And at one more file at ~/.aws/ngydv to store your mfa device arn, if needed.
 
 ```~/.aws/ngydv
 # ~/.aws/ngydv
 [profile_a]
-  mfa_device = arn:aws:iam::nnnnnnnnnnnn:mfa/user_name
+  mfa_serial = arn:aws:iam::nnnnnnnnnnnn:mfa/user_name
 ```
 
 ## Sub commands
@@ -52,7 +52,7 @@ aws_secret_access_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```~/.aws/ngydv
 # ~/aws/ngydv
 [profile_a]
-  mfa_device = arn:aws:iam::nnnnnnnnnnnn:mfa/user_name
+  mfa_serial = arn:aws:iam::nnnnnnnnnnnn:mfa/user_name
 ```
 
 #### assume role

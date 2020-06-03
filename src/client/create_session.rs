@@ -13,7 +13,7 @@ pub async fn send(profile: &mut Profile, token: &str) -> Result<()> {
     ))?;
     match access {
         Access::AccessKey(key) => {
-            serial_number = key.mfa_device.as_ref();
+            serial_number = key.mfa_serial.as_ref();
         }
         Access::AssumeRole(_) => {
             return Err(ProfileTypeError(

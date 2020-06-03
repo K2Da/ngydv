@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 pub struct AccessKey {
     pub access_key_id: String,
     pub secret_access_key: String,
-    pub mfa_device: Option<String>,
+    pub mfa_serial: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
@@ -115,18 +115,26 @@ impl Profile {
                 }
             }
             None => match self.profile_type() {
-                ProfileType::Keys | ProfileType::None => Ok(export::rc(
-                    vec![("AWS_PROFILE", &self.profile_name)],
-                    vec![
+                ProfileType::Keys | ProfileType::None => {
+                    let mut exports = vec![("AWS_PROFILE", &self.profile_name[..])];
+                    let mut unset = vec![
                         "AWS_ACCESS_KEY_ID",
                         "AWS_SECRET_ACCESS_KEY",
                         "AWS_SESSION_TOKEN",
-                    ],
-                    vec![&format!(
-                        "set AWS_PROFILE for profile '{}'",
-                        self.profile_name
-                    )],
-                )),
+                    ];
+                    match &self.region {
+                        Some(region) => exports.push(("AWS_DEFAULT_REGION", &region)),
+                        None => unset.push("AWS_DEFAULT_REGION"),
+                    }
+                    Ok(export::rc(
+                        exports,
+                        unset,
+                        vec![&format!(
+                            "set AWS_PROFILE for profile '{}'",
+                            self.profile_name
+                        )],
+                    ))
+                }
                 ProfileType::AssumeRole(_) | ProfileType::SessionWithMFA => {
                     Err(ProfileNotSignedIn(format!("{}", self.profile_name)))
                 }
@@ -148,7 +156,7 @@ impl Profile {
             Some(Access::AssumeRole(assumed_role)) => {
                 ProfileType::AssumeRole(assumed_role.source_profile.to_string())
             }
-            Some(Access::AccessKey(access_key)) => match access_key.mfa_device {
+            Some(Access::AccessKey(access_key)) => match access_key.mfa_serial {
                 Some(_) => ProfileType::SessionWithMFA,
                 None => ProfileType::Keys,
             },
