@@ -1,10 +1,10 @@
-pub fn rc(exports: Vec<(&str, &str)>, unsets: Vec<&str>, messages: Vec<&str>) -> String {
+pub fn rc(exports: Vec<(&str, String)>, unset: Vec<&str>, messages: Vec<&str>) -> String {
     let mut ret = String::new();
     for (name, value) in exports {
         ret.push_str(&format!("export {}={}\n", name, value));
     }
 
-    for name in unsets {
+    for name in unset {
         ret.push_str(&format!("unset {}\n", name));
     }
 

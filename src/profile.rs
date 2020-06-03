@@ -98,13 +98,16 @@ impl Profile {
         match &self.credential {
             Some(cred) => {
                 if cred.life().gt(&chrono::Duration::seconds(0)) {
+                    let mut exports = vec![
+                        ("AWS_ACCESS_KEY_ID", cred.access_key_id.clone()),
+                        ("AWS_SECRET_ACCESS_KEY", cred.secret_access_key.clone()),
+                        ("AWS_SESSION_TOKEN", cred.session_token.clone()),
+                    ];
+                    let mut unset = vec!["AWS_PROFILE"];
+                    self.add_region(&mut exports, &mut unset);
                     Ok(export::rc(
-                        vec![
-                            ("AWS_ACCESS_KEY_ID", &cred.access_key_id),
-                            ("AWS_SECRET_ACCESS_KEY", &cred.secret_access_key),
-                            ("AWS_SESSION_TOKEN", &cred.session_token),
-                        ],
-                        vec!["AWS_PROFILE"],
+                        exports,
+                        unset,
                         vec![&format!(
                             "set access_key_id, secret_access_key, session_token to env for profile '{}'",
                             self.profile_name
@@ -116,16 +119,13 @@ impl Profile {
             }
             None => match self.profile_type() {
                 ProfileType::Keys | ProfileType::None => {
-                    let mut exports = vec![("AWS_PROFILE", &self.profile_name[..])];
+                    let mut exports = vec![("AWS_PROFILE", self.profile_name.clone())];
                     let mut unset = vec![
                         "AWS_ACCESS_KEY_ID",
                         "AWS_SECRET_ACCESS_KEY",
                         "AWS_SESSION_TOKEN",
                     ];
-                    match &self.region {
-                        Some(region) => exports.push(("AWS_DEFAULT_REGION", &region)),
-                        None => unset.push("AWS_DEFAULT_REGION"),
-                    }
+                    self.add_region(&mut exports, &mut unset);
                     Ok(export::rc(
                         exports,
                         unset,
@@ -139,6 +139,13 @@ impl Profile {
                     Err(ProfileNotSignedIn(format!("{}", self.profile_name)))
                 }
             },
+        }
+    }
+
+    fn add_region(&self, exports: &mut Vec<(&str, String)>, unset: &mut Vec<&str>) {
+        match &self.region {
+            Some(region) => exports.push(("AWS_DEFAULT_REGION", region.clone())),
+            None => unset.push("AWS_DEFAULT_REGION"),
         }
     }
 

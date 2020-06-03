@@ -1,6 +1,6 @@
 [package]
 name = "ngydv"
-version = "0.1.3"
+version = "0.1.4"
 license = "Apache-2.0"
 authors = ["K2Da <id.k2da@gmail.com>"]
 edition = "2018"
