@@ -4,9 +4,13 @@ pub mod show;
 pub use self::collection::ProfileMap;
 use crate::error::Error::*;
 use crate::error::*;
+use ansi_term::Colour;
 use chrono::{DateTime, Duration, FixedOffset, Local, Utc};
 use prettytable::*;
 use serde::{Deserialize, Serialize};
+
+const ACTIVE_COLOUR: Colour = Colour::Green;
+const INACTIVE_COLOUR: Colour = Colour::Red;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct AccessKey {
@@ -23,6 +27,7 @@ pub struct Credential {
     pub session_token: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum ProfileType {
     AssumeRole(String),
     SessionWithMFA,
@@ -45,6 +50,10 @@ impl Credential {
 
     pub fn life(&self) -> Duration {
         self.expiration.signed_duration_since(Utc::now())
+    }
+
+    pub fn alive(&self) -> bool {
+        self.life().gt(&chrono::Duration::seconds(0))
     }
 
     pub fn local_expired_at_str(&self) -> String {
@@ -83,21 +92,33 @@ impl Profile {
         table.set_titles(row!["id", "profile", "region", "type", "credential"]);
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         for profile in profiles.iter() {
+            let colour = if profile.available() {
+                ACTIVE_COLOUR
+            } else {
+                INACTIVE_COLOUR
+            };
             table.add_row(row![
                 profile.order + 1,
-                profile.profile_name,
+                colour.paint(profile.profile_name.clone()),
                 profile.region_str(),
                 profile.profile_type_str(),
-                profile.credential_str(),
+                colour.paint(profile.credential_str()),
             ]);
         }
         table.printstd();
     }
 
+    pub fn available(&self) -> bool {
+        match &self.credential {
+            Some(cred) => cred.alive(),
+            None => self.profile_type() == ProfileType::Keys,
+        }
+    }
+
     pub fn export(&self) -> Result<String> {
         match &self.credential {
             Some(cred) => {
-                if cred.life().gt(&chrono::Duration::seconds(0)) {
+                if cred.alive() {
                     let mut exports = vec![
                         ("AWS_ACCESS_KEY_ID", cred.access_key_id.clone()),
                         ("AWS_SECRET_ACCESS_KEY", cred.secret_access_key.clone()),
@@ -170,11 +191,12 @@ impl Profile {
             None => ProfileType::None,
         }
     }
+
     fn credential_str(&self) -> String {
         match &self.credential {
             Some(cred) => {
                 let life = cred.life();
-                if life.gt(&chrono::Duration::seconds(0)) {
+                if cred.alive() {
                     format!(
                         "{}{}{}",
                         duration_to_string(life.num_hours(), "hour", "hours"),
