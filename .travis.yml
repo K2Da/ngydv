@@ -1,0 +1,78 @@
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
+
+dist: trusty
+language: rust
+services: docker
+sudo: required
+
+# Rust builds on stable by default, this can be
+# overridden on a case by case basis down below.
+
+env:
+  global:
+    # Update this to match the name of your project.
+    - CRATE_NAME=ngydv
+
+matrix:
+  # These are all the build jobs. Adjust as necessary. Comment out what you
+  # don't need
+  include:
+    # Linux
+    - env: TARGET=arm-unknown-linux-gnueabi
+    - env: TARGET=armv7-unknown-linux-gnueabihf
+    - env: TARGET=x86_64-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-musl
+
+    # OSX
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+before_script:
+  - cargo install --force cross --version 0.1.16
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
+
+script:
+  - bash ci/script.sh
+
+after_script: set +e
+
+before_deploy:
+  - sh ci/before_deploy.sh
+
+deploy:
+  # update `api_key.secure`
+  # - Create a `public_repo` GitHub token. Go to: https://github.com/settings/tokens/new
+  # - Encrypt it: `travis encrypt 0123456789012345678901234567890123456789
+  # - Paste the output down here
+  api_key:
+    secure: kQhUbB4vFqkwm+veYWWEjzTk9hoK2wiDDby7NpbzXLVOc780uXNymLWCNOY/wi8BxltEH2Fp938UTCQBiCQ/7dL1Bt3CCGCAumzmJITqLD7EpstVCyn/qblYMlfvv2dBz9U+wxc4Hj0wvBeMlfmOyN0XM1Nbfln+eEsdUklLApRQlxqjwtJVfRB2a4uZOQew7CZz6+baJLoKdN/Fcr9jfAvbgjg7PldoOVFEUr8MvP7yl2cKOmil276q+Oo3G97/q9KIdlMTGHakU7TKvldb7ujEwQ2Qkb/FD8b2Vc+cJycAsTqqpVUXe78h7a9tTyFkkgktcSITdoebWXEnn61Sm0/u+I+RjHI1Gmt2/yUlJ82jWWSOGdxfV+v5VbGHdKGRRRaUKFsUT2guTFgCnRo3bhc4LhL+v70E2f47Hhwq5a014dxRTmnklBQHRktL/f6KQj2jt2g3b644Rua6VI0wZWdgSx3xyxPebi3DVgdLUhnLZclzWK/5ndsb9lhkV+DC30qAtZQBXoj+H3q2k+LoTg30axt4nQOBVZud5WDukCd+xYiSInnv4XUpXGhlKxsoubA7YirZ/3b0QGtC+b31J0uBphWNvh3PR7s2TmVFX9IILKWBVmfEEfiAYgiEEJbAlVY8lynUIf+nbBAGoTENcdbUObfdFzx5s5aJVIHYamU=
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    condition: $TRAVIS_RUST_VERSION = stable
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    # release tags
+    - /^v\d+\.\d+\.\d+.*$/
+    # - master
+
+notifications:
+  email:
+    on_success: never

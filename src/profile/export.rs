@@ -23,7 +23,7 @@ mod tests {
     fn test_rc() {
         assert_eq!(
             rc(
-                vec![("ABC", "aaa"), ("XYZ", "bbb")],
+                vec![("ABC", "aaa".to_string()), ("XYZ", "bbb".to_string())],
                 vec!["FOO", "BAR"],
                 vec!["text", "message"],
             ),
