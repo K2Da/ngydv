@@ -2,6 +2,13 @@
 ngydv creates aws cli session keys with mfa-token and stores, exports it.
 
 ## Installation
+### Using homebrew
+With this command, download binary for mac/linux.
+
+```
+brew install K2Da/tap/ngydv
+```
+
 ### Using cargo
 
 ```bash

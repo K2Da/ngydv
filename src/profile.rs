@@ -4,13 +4,13 @@ pub mod show;
 pub use self::collection::ProfileMap;
 use crate::error::Error::*;
 use crate::error::*;
-use ansi_term::Colour;
+use ansi_term::Color;
 use chrono::{DateTime, Duration, FixedOffset, Local, Utc};
 use prettytable::*;
 use serde::{Deserialize, Serialize};
 
-const ACTIVE_COLOUR: Colour = Colour::Green;
-const INACTIVE_COLOUR: Colour = Colour::Red;
+const ACTIVE_COLOUR: Color = Color::Green;
+const INACTIVE_COLOUR: Color = Color::Red;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct AccessKey {
