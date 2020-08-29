@@ -115,6 +115,22 @@ impl Profile {
         }
     }
 
+    pub fn assumable(&self, profile_map: &ProfileMap) -> bool {
+        match self.profile_type() {
+            ProfileType::AssumeRole(assumed_role) => match &self.credential {
+                Some(cred) => {
+                    !cred.alive()
+                        && match profile_map.get(&assumed_role) {
+                            Ok(role) => role.available(),
+                            _ => false,
+                        }
+                }
+                None => true,
+            },
+            _ => false,
+        }
+    }
+
     pub fn export(&self) -> Result<String> {
         match &self.credential {
             Some(cred) => {

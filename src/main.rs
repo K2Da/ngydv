@@ -29,7 +29,10 @@ async fn execute(opts: opts::Opts) -> Result<()> {
     use opts::{ClearCommand, SubCommand};
     match opts.sub_command {
         SubCommand::Profile => Profile::print_table(&profile_map),
-        SubCommand::Export { profile } => profile_map.print_export(&profile)?,
+        SubCommand::Export { profile } => {
+            profile_map.print_export(&profile).await?;
+            store_credentials(&mut profile_map)?;
+        }
         SubCommand::In {
             profile: profile_name,
             token,
@@ -37,11 +40,14 @@ async fn execute(opts: opts::Opts) -> Result<()> {
             let profile = profile_map.get_mut(&profile_name)?;
             use crate::profile::ProfileType::*;
             match profile.profile_type() {
-                AssumeRole(_) => assume_role::send(profile, &token).await?,
+                AssumeRole(_) => {
+                    assume_role::send(&profile_name, &mut profile_map, Some(token.to_owned()))
+                        .await?
+                }
                 SessionWithMFA => create_session::send(profile, &token).await?,
                 _ => return Err(ProfileNotForSignIn(profile_name.to_owned())),
             }
-            profile_map.print_export(&profile_name)?;
+            profile_map.print_export(&profile_name).await?;
             store_credentials(&mut profile_map)?;
         }
         SubCommand::Env => list_environment_vars(),

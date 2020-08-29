@@ -37,8 +37,10 @@ impl ProfileMap {
     pub fn profile_by_key(&self, access_key_id: &str, secret_access_key: &str) -> Option<&Profile> {
         for (_, profile) in self.map.iter() {
             if let Some(cred) = &profile.credential {
-                if cred.access_key_id == access_key_id && cred.secret_access_key == secret_access_key {
-                    return Some(profile)
+                if cred.access_key_id == access_key_id
+                    && cred.secret_access_key == secret_access_key
+                {
+                    return Some(profile);
                 }
             }
         }
@@ -49,7 +51,10 @@ impl ProfileMap {
         self.map.values().collect::<Vec<&Profile>>()
     }
 
-    pub fn print_export(&self, profile_name: &str) -> Result<()> {
+    pub async fn print_export(&mut self, profile_name: &str) -> Result<()> {
+        if !self.get(profile_name)?.available() && self.get(profile_name)?.assumable(self) {
+            crate::client::assume_role::send(profile_name, self, None).await?;
+        }
         println!("{}", self.get(profile_name)?.export()?);
         Ok(())
     }

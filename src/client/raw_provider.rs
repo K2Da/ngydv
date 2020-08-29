@@ -4,7 +4,7 @@ use rusoto_credential::ProvideAwsCredentials;
 use rusoto_credential::{AwsCredentials, CredentialsError};
 
 pub struct RawProvider {
-    credential: Credential,
+    pub credential: Credential,
 }
 
 #[async_trait]
